@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>在线获取京东Cookies</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/davidshimjs-qrcodejs@0.0.2/qrcode.min.js"
+    ></script>
+    <link rel="stylesheet" type="text/css" href="./css/main.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <p class="dec">⚠️请确认你信任此服务的提供商<br />否则会有隐私泄漏风险</p>
+      <button class="btn" id="cookietools" title="手机扫描二维码登录">
+        点击获取二维码
+      </button>
+    </div>
+    <div id="qrcontainer" class="hidden">
+      <div class="qframe">
+        <div id="refresh_qrcode" class="hidden">
+          <div>
+            <h3>二维码已失效</h3>
+            <div class="refresh">刷新</div>
+          </div>
+        </div>
+        <div id="qrcode"></div>
+        <div class="info">
+          请使用京东APP扫码<br />或截图用京东APP扫码<br />完成后请回到此页面复制cookies
+        </div>
+      </div>
+    </div>
+    <script>
+      var qrcode, userCookie, user;
+      $(document).ready(function () {
+        qrcode = new QRCode(document.getElementById('qrcode'), {
+          text: 'sample',
+          correctLevel: QRCode.CorrectLevel.L,
+        });
+
+        function copyToClip(content, message) {
+          var aux = document.createElement('input');
+          aux.setAttribute('value', content);
+          document.body.appendChild(aux);
+          aux.select();
+          document.execCommand('copy');
+          document.body.removeChild(aux);
+        }
+
+        function checkLogin(user) {
+          var timeId = setInterval(() => {
+            let timeStamp = new Date().getTime();
+            $.post(`./cookie?t=${timeStamp}`, { user }, function (data) {
+              if (data.err == 0) {
+                clearInterval(timeId);
+                $('#qrcontainer').addClass('hidden');
+                $('#refresh_qrcode').addClass('hidden');
+                userCookie = data.cookie;
+                Swal.fire({
+                  title: 'cookie已获取',
+                  html:
+                    '<div class="cookieCon" style="font-size:12px;">' +
+                    userCookie +
+                    '</div>',
+                  text: userCookie,
+                  icon: 'success',
+                  confirmButtonText: '复制',
+                }).then((result) => {
+                  copyToClip(userCookie);
+                });
+              } else if (data.err == 21) {
+                clearInterval(timeId);
+                $('#refresh_qrcode').removeClass('hidden');
+              }
+            });
+          }, 3000);
+        }
+
+        function get_code() {
+          let timeStamp = new Date().getTime();
+          $.get('./qrcode?t=' + timeStamp, function (data) {
+            if (data.err == 0) {
+              $('#qrcontainer').removeClass('hidden');
+              $('#refresh_qrcode').addClass('hidden');
+              qrcode.clear();
+              qrcode.makeCode(data.qrcode);
+              user = data.user;
+              checkLogin(user);
+            } else {
+              Swal.fire({
+                text: data.msg,
+                icon: 'error',
+              });
+            }
+          });
+        }
+        $('.refresh').click(get_code);
+        $('#cookietools').click(get_code);
+      });
+    </script>
+  </body>
+</html>
