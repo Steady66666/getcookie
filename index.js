@@ -292,7 +292,7 @@ app.post('/cookie', function (request, response) {
 });
 
 // 本地运行开启以下
-const PORT = 5678;
+const PORT = 2580;
 app.listen(PORT, () => {
   console.log(`应用正在监听 ${PORT} 端口!`);
 });
