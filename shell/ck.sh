@@ -38,7 +38,7 @@ delcookie() {
 		cat /usr/share/jd_openwrt_script/script_config/jdCookie.js | sed -e "s/pt_key=XXX;pt_pin=XXX//g" -e "s/pt_pin=(//g" -e "s/pt_key=xxx;pt_pin=xxx//g"| grep "pt_pin" | sed -e "s/',//g" -e "s/'//g"
 		echo "---------------------------------------------------------------------------"
 		echo ""
-		read -p "是否需要删除cookie（1.需要  2.返回上一层 ）：" cookie_continue
+		read -p "是否需要继续删除cookie（1.需要  2.返回上一层 ）：" cookie_continue
 		if [ "$cookie_continue" == "1" ];then
 			echo "请稍等。。。"
 			delcookie
@@ -124,8 +124,26 @@ addcookie() {
 		echo  "------------------------------------------------------------------------------"
 	fi
 	echo -e "完成"
-	script_start
-
+	read -p "选择生效cookie还是继续添加（1.生效  2.回到上一层  任意键.继续添加）" cookie_act
+	if [ "$cookie_act" == "1" ];then
+		echo -e "重启并发中"
+		sh $jd kill_ccr
+		sh $jd update
+		echo -e "重启完成"
+		sleep 1
+		echo -e "开始替换助力"
+		sh /root/cpjd.sh
+		echo -e "$green若无报错，脚本运行完毕，正在返回上一层 $white"
+		script_start
+	elif [ "$cookie_act" == "2" ];then
+		echo -e "返回上一层中。。。"
+		sleep 1
+		script_start
+	else
+		echo -e "继续添加"
+		sleep 1
+		addcookie
+	fi
 }
 
 script_start() {
@@ -149,7 +167,7 @@ fi
 }
 #启动问候
 script_start() {
-read -p "选择是添加更新还是删除（1.添加更新  2.删除  3.退出 4.人员信息）：" start_way
+read -p "选择是添加更新还是删除（1.添加更新  2.删除  3.退出  4.人员信息）：" start_way
 if [ "$start_way" == "1" ];then
 	echo -e "$green正在跳转： 添加更新$white"
 	sleep 1
@@ -164,11 +182,11 @@ elif [ "$start_way" == "3" ];then
 	exit 0
 elif [ "$start_way" == "4" ];then
 	head -n 15 /usr/share/jd_openwrt_script/script_config/jdCookie.js | awk -F "pt_pin=" '{print $2}'
+	script_start
 else
-	echo -e "$red 无效输入：请输入1,2,3或者4    OK? $white"
+	echo -e "$red 无效输入：请输入1,2,3或4  $white"
 	script_start
 fi
 }
 script_start
-
 
