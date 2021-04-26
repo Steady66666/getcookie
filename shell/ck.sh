@@ -146,25 +146,6 @@ addcookie() {
 	fi
 }
 
-script_start() {
-read -p "选择是添加更新还是删除（1.添加更新  2.删除  3.退出）：" start_way
-if [ "$start_way" == "1" ];then
-	echo -e "$green正在跳转： 添加更新$white"
-	sleep 1
-	addcookie
-elif [ "$start_way" == "2" ];then
-	echo -e "$green正在跳转： 删除$white"
-	sleep 1
-	delcookie
-elif [ "$start_way" == "3" ];then
-	echo "正在退出脚本"
-	sleep 1
-	exit 0
-else
-	echo -e "$red 无效输入：请输入1,2或者3    OK? $white"
-	script_start
-fi
-}
 #启动问候
 script_start() {
 read -p "选择是添加更新还是删除（1.添加更新  2.删除  3.退出  4.人员信息）：" start_way
