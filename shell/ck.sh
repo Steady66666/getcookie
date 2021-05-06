@@ -38,13 +38,25 @@ delcookie() {
 		cat /usr/share/jd_openwrt_script/script_config/jdCookie.js | sed -e "s/pt_key=XXX;pt_pin=XXX//g" -e "s/pt_pin=(//g" -e "s/pt_key=xxx;pt_pin=xxx//g"| grep "pt_pin" | sed -e "s/',//g" -e "s/'//g"
 		echo "---------------------------------------------------------------------------"
 		echo ""
-		read -p "是否需要继续删除cookie（1.需要  2.返回上一层 ）：" cookie_continue
+		read -p "是否需要继续删除cookie（1.生效  2.返回上一层  任意键.继续删除）：" cookie_continue
 		if [ "$cookie_continue" == "1" ];then
-			echo "请稍等。。。"
-			delcookie
-		else
-			echo "返回上一层。。。"
+			echo -e "重启并发中"
+			sh $jd kill_ccr
+			sh $jd update
+			echo -e "重启完成"
+			sleep 1
+			echo -e "开始替换助力"
+			sh /root/cpjd.sh
+			echo -e "$green若无报错，脚本运行完毕，正在返回上一层 $white"
 			script_start
+		elif [ "$cookie_continue"  == "2" ];then
+			echo "返回上一层。。。"
+			sleep 1
+			script_start
+		else
+			echo "请稍后。。。"
+			sleep 1
+			delcookie
 		fi
 	else
 		echo -e "$yellow你的cookie空空如也，比地板都干净，你想删啥。。。。。$white"
@@ -124,7 +136,7 @@ addcookie() {
 		echo  "------------------------------------------------------------------------------"
 	fi
 	echo -e "完成"
-	read -p "选择生效cookie还是继续添加（1.生效  2.回到上一层  任意键.继续添加）" cookie_act
+	read -p "选择生效cookie还是继续添加（1.生效  2.回到上一层  任意键.继续添加）：" cookie_act
 	if [ "$cookie_act" == "1" ];then
 		echo -e "重启并发中"
 		sh $jd kill_ccr
